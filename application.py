@@ -124,12 +124,17 @@ def quote():
         # Lookup the stock symbol
         quote = lookup(request.form.get("symbol"))
 
-        # Get value pairs from JSON
-        name = quote["name"]
-        symbol = quote["symbol"]
-        price = quote["price"]
+        # If user prints invalid symbol
+        if quote == None:
+            return apology("invalid symbol", 403)
 
-        return render_template("quoted.html", name=name, symbol=symbol, price=price)
+        else:
+            # Get value pairs from JSON
+            name = quote["name"]
+            symbol = quote["symbol"]
+            price = quote["price"]
+
+            return render_template("quoted.html", name=name, symbol=symbol, price=price)
 
 
 @app.route("/register", methods=["GET", "POST"])
