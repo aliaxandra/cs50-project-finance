@@ -64,7 +64,7 @@ def history():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
- 
+
     # Forget any user_id
     session.clear()
 
@@ -114,8 +114,22 @@ def logout():
 def quote():
     """Get stock quote."""
 
-    
-    return apology("TODO")
+    # Reached via GET display quote form
+    if request.method == "GET":
+        return render_template("quote.html")
+
+    # By submitting form via POST
+    else:
+
+        # Lookup the stock symbol
+        quote = lookup(request.form.get("symbol"))
+
+        # Get value pairs from JSON
+        name = quote["name"]
+        symbol = quote["symbol"]
+        price = quote["price"]
+
+        return render_template("quoted.html", name=name, symbol=symbol, price=price)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -125,7 +139,7 @@ def register():
     # User reached route via GET (as by clicking a link or via redirect)
     # Display registration form
     if request.method == "GET":
-        return render_template("register.html")  
+        return render_template("register.html")
 
     else:
         # Ensure username was submitted
@@ -149,8 +163,8 @@ def register():
             return apology("passwords should mutch", 403)
 
         # Add new user info into db
-        db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", 
-            username=request.form.get("username"), 
+        db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)",
+            username=request.form.get("username"),
             hash=generate_password_hash(request.form.get("password")))
 
         return redirect("/")
