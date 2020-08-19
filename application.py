@@ -51,7 +51,29 @@ def index():
 @login_required
 def buy():
     """Buy shares of stock"""
-    return apology("TODO")
+
+    # User reached route via GET
+    if request.method == "GET":
+        return render_template("buy.html")
+
+    # User reached route via POST
+    else:
+        # Lookup the stock symbol
+        quote = lookup(request.form.get("symbol"))
+
+        if request.form.get("shares") == '':
+            return apology("you have to print the number of shares", 403)
+
+        # Number of shares
+        shares = int(request.form.get("shares"))
+
+        # If user prints invalid symbol
+        if quote == None:
+            return apology("invalid symbol", 403)
+
+        # If user prints invalid number of shares
+        if shares <= 0:
+            return apology("invalid number of shares", 403)
 
 
 @app.route("/history")
