@@ -64,7 +64,7 @@ def history():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
-
+ 
     # Forget any user_id
     session.clear()
 
@@ -119,7 +119,39 @@ def quote():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
-    return apology("TODO")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    # Display registration form
+    if request.method == "GET":
+        return render_template("register.html")  
+
+    else:
+        # Ensure username was submitted
+        if not request.form.get("username"):
+            return apology("must provide username", 403)
+
+        # Query database for username
+        rows = db.execute("SELECT * FROM users WHERE username = :username",
+                          username=request.form.get("username"))
+
+        # Ensure username unique
+        if len(rows) == 1:
+            return apology("the username is already exist", 403)
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):
+            return apology("must provide password", 403)
+
+        # Ensure password confirmation match the password
+        elif request.form.get("password") != request.form.get("confirmation"):
+            return apology("passwords should mutch", 403)
+
+        # Add new user info into db
+        db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", 
+            username=request.form.get("username"), 
+            hash=generate_password_hash(request.form.get("password")))
+
+        return redirect("/")
 
 
 @app.route("/sell", methods=["GET", "POST"])
