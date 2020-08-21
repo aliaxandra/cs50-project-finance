@@ -40,6 +40,11 @@ main
     text-align: center;
 }
 
+main table 
+{
+    text-align: left;
+}
+
 main img
 {
     /* constrain images on small screens */

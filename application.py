@@ -45,7 +45,31 @@ if not os.environ.get("API_KEY"):
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return apology("TODO")
+
+    # Query database
+    rows = db.execute(
+        "SELECT symbol, shares, cash FROM transactions INNER JOIN users ON users.id = transactions.user_id WHERE user_id = :user_id",
+        user_id=session["user_id"])
+
+    total_grand = 0
+
+    # Call lookup for each stock
+    for row in rows:
+        quote = lookup(row['symbol'])
+        row["name"] = quote["name"]
+        row["price_actual"] = usd(quote["price"])
+        total_holding = quote["price"] * row["shares"]
+        row["total_holding"] = usd(total_holding)
+        total_grand += total_holding
+
+    cash = rows[0]["cash"]
+
+    total_grand += cash
+
+    return render_template("index.html",
+                           rows=rows,
+                           cash=usd(cash),
+                           total_grand=usd(total_grand))
 
 
 @app.route("/buy", methods=["GET", "POST"])
