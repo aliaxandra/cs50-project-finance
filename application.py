@@ -1,4 +1,5 @@
 import os
+import time
 
 from cs50 import SQL
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
@@ -58,22 +59,52 @@ def buy():
 
     # User reached route via POST
     else:
+
+        # Error handling
+
         # Lookup the stock symbol
         quote = lookup(request.form.get("symbol"))
-
-        if request.form.get("shares") == '':
-            return apology("you have to print the number of shares", 403)
-
-        # Number of shares
-        shares = int(request.form.get("shares"))
 
         # If user prints invalid symbol
         if quote == None:
             return apology("invalid symbol", 403)
 
         # If user prints invalid number of shares
-        if shares <= 0:
+        if int(request.form.get("shares")) <= 0:
             return apology("invalid number of shares", 403)
+
+
+        # Check if user can afford the stock
+
+        # Calculate overall expence
+        expense = quote["price"] * int(request.form.get("shares"))
+
+        # Define user's cash
+        rows = db.execute("SELECT * FROM users WHERE id = :user_id", user_id=session["user_id"])
+        session["cash"] = rows[0]["cash"]
+
+        # If user can't afford the stock
+        if expense > session["cash"]:
+            return apology("can't afford", 403)
+
+
+        # If user can afford requested stock, add vlues into  transaction table
+        db.execute(
+            "INSERT INTO transactions (user_id, symbol, shares, price, transacted) VALUES (:user_id, :symbol, :shares, :price, :transacted)",
+            user_id=session["user_id"],
+            symbol=request.form.get("symbol").upper(),
+            shares=int(request.form.get("shares")),
+            price=usd(quote["price"]),
+            transacted=time.strftime('%Y-%m-%d %H:%M:%S'))
+
+
+        # Calculate and update users cash
+        cash = session["cash"] - expense
+
+        db.execute("UPDATE users SET cash=? WHERE id=?", cash,
+                   session["user_id"])
+
+        return redirect("/")
 
 
 @app.route("/history")
