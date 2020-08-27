@@ -28,7 +28,7 @@ Home
 
         <tbody>
             {% for row in rows %}
-                {% if row["SUM(shares)"] > 0 %}
+                {% if total_grand != cash %}
                     <tr>
                         <td>{{ row["symbol"] }}</td>
                         <td>{{ row["name"] }}</td>

@@ -1,5 +1,6 @@
 import os
 import time
+import re
 
 from cs50 import SQL
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
@@ -46,32 +47,44 @@ if not os.environ.get("API_KEY"):
 def index():
     """Show portfolio of stocks"""
 
+    # For new user, with no transactions:
+    if not db.execute("SELECT * FROM users INNER JOIN transactions ON users.id = transactions.user_id WHERE user_id = :user_id", user_id=session["user_id"]):
+        rows = db.execute("SELECT * FROM users WHERE id = :id",
+                          id=session["user_id"])
+
+        cash = rows[0]["cash"]
+        total_grand = cash
+
+        return render_template("index.html",
+                           rows=rows,
+                           cash=usd(cash),
+                           total_grand=usd(total_grand))
+
     # Query database
     rows = db.execute(
         "SELECT symbol, SUM(shares), cash FROM transactions INNER JOIN users ON users.id = transactions.user_id WHERE user_id = :user_id GROUP BY symbol",
         user_id=session["user_id"])
 
     total_grand = 0
+    cash = rows[0]["cash"]
 
     # Call lookup for each stock
     for row in rows:
-        quote = lookup(row['symbol'])
-        row["name"] = quote["name"]
-        row["price_actual"] = usd(quote["price"])
-        total_holding = quote["price"] * row["SUM(shares)"]
-        row["total_holding"] = usd(total_holding)
-        total_grand += total_holding
-
-    cash = rows[0]["cash"]
+        if row["SUM(shares)"] > 0:
+            quote = lookup(row['symbol'])
+            row["name"] = quote["name"]
+            row["price_actual"] = usd(quote["price"])
+            total_holding = quote["price"] * row["SUM(shares)"]
+            row["total_holding"] = usd(total_holding)
+            total_grand += total_holding
 
     total_grand += cash
 
     return render_template("index.html",
-                           rows=rows,
-                           cash=usd(cash),
-                           total_grand=usd(total_grand)
-                           )
-
+                        rows=rows,
+                        cash=usd(cash),
+                        total_grand=usd(total_grand)
+                        )
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
@@ -247,6 +260,21 @@ def register():
         # Ensure password was submitted
         elif not request.form.get("password"):
             return apology("must provide password", 403)
+
+        # Check password validation
+        passwd = request.form.get("password")
+
+        reg = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$"
+
+        # compiling regex
+        pat = re.compile(reg)
+
+        # searching regex
+        mat = re.search(pat, passwd)
+
+        # validating conditions
+        if not mat:
+            return apology("password invalid", 403)
 
         # Ensure password confirmation match the password
         elif request.form.get("password") != request.form.get("confirmation"):
