@@ -28,13 +28,15 @@ Home
 
         <tbody>
             {% for row in rows %}
-                <tr>
-                    <td>{{ row["symbol"] }}</td>
-                    <td>{{ row["name"] }}</td>
-                    <td>{{ row["SUM(shares)"] }}</td>
-                    <td>{{ row["price_actual"] }}</td>
-                    <td>{{ row["total_holding"] }}</td>
-                </tr>
+                {% if row["SUM(shares)"] > 0 %}
+                    <tr>
+                        <td>{{ row["symbol"] }}</td>
+                        <td>{{ row["name"] }}</td>
+                        <td>{{ row["SUM(shares)"] }}</td>
+                        <td>{{ row["price_actual"] }}</td>
+                        <td>{{ row["total_holding"] }}</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
             <tr>
                 <td colspan="4">CASH</td>
