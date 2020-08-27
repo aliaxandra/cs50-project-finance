@@ -12,34 +12,21 @@ History
         <thead>
             <tr>
                 <th>Symbol</th>
-                <th>Name</th>
                 <th>Shares</th>
                 <th>Price</th>
-                <th>TOTAL</th>
+                <th>Transacted</th>
             </tr>
         </thead>
-
-        <tfoot>
-            <tr>
-                <td colspan="4"></td>
-                <td>{{ total_grand }}</td>
-            </tr>
-        </tfoot>
 
         <tbody>
             {% for row in rows %}
             <tr>
                 <td>{{ row["symbol"] }}</td>
-                <td>{{ row["name"] }}</td>
                 <td>{{ row["shares"] }}</td>
-                <td>{{ row["price_actual"] }}</td>
-                <td>{{ row["total_holding"] }}</td>
+                <td>{{ row["price"] }}</td>
+                <td>{{ row["transacted"] }}</td>
             </tr>
             {% endfor %}
-            <tr>
-                <td colspan="4">CASH</td>
-                <td>{{ cash }}</td>
-            </tr>
         </tbody>
 
     </table>
