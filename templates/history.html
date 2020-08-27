@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Home
+History
 {% endblock %}
 
 {% block main %}
@@ -28,13 +28,13 @@ Home
 
         <tbody>
             {% for row in rows %}
-                <tr>
-                    <td>{{ row["symbol"] }}</td>
-                    <td>{{ row["name"] }}</td>
-                    <td>{{ row["SUM(shares)"] }}</td>
-                    <td>{{ row["price_actual"] }}</td>
-                    <td>{{ row["total_holding"] }}</td>
-                </tr>
+            <tr>
+                <td>{{ row["symbol"] }}</td>
+                <td>{{ row["name"] }}</td>
+                <td>{{ row["shares"] }}</td>
+                <td>{{ row["price_actual"] }}</td>
+                <td>{{ row["total_holding"] }}</td>
+            </tr>
             {% endfor %}
             <tr>
                 <td colspan="4">CASH</td>
